@@ -14,7 +14,7 @@ BRANCH_PROTECTION_LEVEL = 0
 
 def readArgs():
     """Read console args and instatiate global variable with it"""
-    global API_TOKEN, GROUP_NAME, MAIN_REPO
+    global API_TOKEN, GROUP_NAME, MAIN_REPO, BRANCH_PROTECTION_LEVEL
     try:
         args = sys.argv
         if args[1] == '--help' or args[1] == '-h':
