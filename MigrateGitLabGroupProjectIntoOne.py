@@ -3,7 +3,7 @@ import urllib.request as requests
 import urllib.error as RequestErrors
 import urllib.parse as urlParse
 
-TOTAL_STEP = 7
+KEY_STEP = 7
 API_URL = 'https://gitlab.com/api/v4/'
 
 API_TOKEN = None
@@ -164,17 +164,17 @@ def git_do(command, into=os.getcwd()):
 if __name__ == "__main__":
     readArgs()
 
-    progress(0, TOTAL_STEP, "Getting project list")
+    progress(0, KEY_STEP, "Getting project list")
 
     projects = gitlab_get('groups/{}/projects'.format(GROUP_NAME))
     nb_project = len(projects) - 1  # nb of projects minus main project
     project_counter = 1
-    TOTAL_STEP = nb_project * TOTAL_STEP
+    TOTAL_STEP = nb_project * KEY_STEP
 
-    p = lambda x : ((TOTAL_STEP - 2) * (project_counter - 1)) + x # compute real progression_step
+    p = lambda x : ((KEY_STEP - 2) * (project_counter - 1)) + x # compute real progression_step
    
-    progress(p(1), TOTAL_STEP, "{} projects found".format(nb_project))
-    progress(p(2), TOTAL_STEP, "Starting project merging")
+    progress(1, TOTAL_STEP, "{} projects found".format(nb_project))
+    progress(2, TOTAL_STEP, "Starting project merging")
 
     # get the main repo data
     main_repo = [project for project in projects if project['name'] == MAIN_REPO][0]
@@ -200,12 +200,13 @@ if __name__ == "__main__":
                 # rename branch if it's project master
                 new_branch_name = project['name'] if branch['name'] == 'master' else '{}_{}'.format(project['name'], branch['name'])
                 
-                progress(p(6 + (0.01*branch_counter)), TOTAL_STEP, "pushing branch {}".format(new_branch_name))
+                progress(p(6 + branch_counter), TOTAL_STEP, "pushing {} into {}".format(branch['name'], new_branch_name))
 
                 # checkout branch and push it to new branch in main repo
                 git_do(['checkout', branch['name']], project['name'])
                 git_do(['push', '-u', MAIN_REPO, '{}:{}'.format(branch['name'], new_branch_name), '--force'], project['name'])
 
+                # give rights on push and merge on the branch
                 gitlab_post(
                     'projects/{}/protected_branches'.format(main_repo['id']), 
                     {
@@ -214,11 +215,11 @@ if __name__ == "__main__":
                         "merge_access_level": BRANCH_PROTECTION_LEVEL
                     }
                 )
-                time.sleep(0.5) # give extra time for the request to end #TODO this is a hack
+                time.sleep(0.5) # give extra time for the request to end. /!\WARNING :this is a hack a better solution will be found
 
                 branch_counter += 1
 
-            progress(p(7), TOTAL_STEP, "Deleting temporary files")
+            progress(p(7  + branch_counter) , TOTAL_STEP, "Deleting temporary files")
 
             # delete cloned project from local to optimize storage capacity 
             shutil.rmtree(project['name'], ignore_errors=False, onerror=handleRemoveReadonly)
