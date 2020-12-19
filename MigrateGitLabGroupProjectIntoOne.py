@@ -1,4 +1,4 @@
-import subprocess, json, shutil, stat, os, errno, sys
+import subprocess, json, shutil, stat, os, errno, sys, time
 import urllib.request as requests
 import urllib.error as RequestErrors
 import urllib.parse as urlParse
@@ -214,6 +214,7 @@ if __name__ == "__main__":
                         "merge_access_level": BRANCH_PROTECTION_LEVEL
                     }
                 )
+                time.sleep(0.5) # give extra time for the request to end #TODO this is a hack
 
                 branch_counter += 1
 
