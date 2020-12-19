@@ -1,4 +1,4 @@
-# Migrate GitLab group's project into one
+# Merge Gitlab group's projects into one 
 Migrate all branches of all projects of gitlab group into a main project
 
 ## Migration utility for moving multiple Gitlab project into a main repo as branches
