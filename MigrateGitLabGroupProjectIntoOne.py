@@ -41,11 +41,14 @@ def displayHelp():
     required arguments:
         api-token                 Token mandatory to use gitlab API see gitlab documentation 
                                     at https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+        group-name                Name of the group where all projects are.
+        main-repo                 The repository where all the other group's projects will be pushed as 
                                     branches
         branch-protection-level   Right of push and merge on your branches. 
                                     0  => No protection
                                     30 => Developers + Maintainers + Admin
                                     40 => Maintainer + Admin 
+                                    60 => Admin only
 
     optional arguments:
         -h, --help              show this help message and exit
