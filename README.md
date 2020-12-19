@@ -5,7 +5,7 @@ Migrate all branches of all projects of gitlab group into a main project
 This tool provide an automated way to push all repository in a Gitlab group into a main repository as branch. All branches are copied. Perfect way to modernize your versioning organization
 
 ## Usage
-Type `python migrateGitlabGroupIntoOne.py --help` for usage information.
+Type `python migrate_to_one_project.py --help` for usage information.
 ```
 usage: 
   migrate_to_one_project.py [-h] api-token group-name main-repo branch-protection-level
