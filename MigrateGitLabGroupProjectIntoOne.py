@@ -9,6 +9,7 @@ API_URL = 'https://gitlab.com/api/v4/'
 API_TOKEN = None
 GROUP_NAME = None
 MAIN_REPO = None
+BRANCH_PROTECTION_LEVEL = 0
 
 
 def readArgs():
@@ -23,9 +24,10 @@ def readArgs():
             API_TOKEN=args[1]
             GROUP_NAME=args[2]
             MAIN_REPO=args[3]
+            BRANCH_PROTECTION_LEVEL=args[4]
 
-    except IndexError as e:
-        print("ERR: No argument given use '-h' to see help")
+    except IndexError:
+        print("Invalid argument. Use '-h' to see usage")
         exit()
 
 
@@ -34,15 +36,17 @@ def displayHelp():
     print(
     """
     usage: 
-        migrate_to_one_project.py [-h] api-token group-name main-repo
+        migrate_to_one_project.py [-h] api-token group-name main-repo branch-protection-level
 
     required arguments:
-        api-token               Token mandatory to use gitlab API see gitlab documentation 
-                                at https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
-        group-name              Name of the group where all projects are.
-        main-repo               The repository where all the other group's projects will be pushed as 
-                                branches
-    
+        api-token                 Token mandatory to use gitlab API see gitlab documentation 
+                                    at https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+                                    branches
+        branch-protection-level   Right of push and merge on your branches. 
+                                    0  => No protection
+                                    30 => Developers + Maintainers + Admin
+                                    40 => Maintainer + Admin 
+
     optional arguments:
         -h, --help              show this help message and exit
     """
@@ -189,8 +193,6 @@ if __name__ == "__main__":
 
             # add main repo url as new origin
             git_do(['remote', 'add', MAIN_REPO, main_repo['http_url_to_repo']], project['name'])
-
-
             for branch in branches:
                 # rename branch if it's project master
                 new_branch_name = project['name'] if branch['name'] == 'master' else '{}_{}'.format(project['name'], branch['name'])
@@ -201,18 +203,12 @@ if __name__ == "__main__":
                 git_do(['checkout', branch['name']], project['name'])
                 git_do(['push', '-u', MAIN_REPO, '{}:{}'.format(branch['name'], new_branch_name), '--force'], project['name'])
 
-
-                # protect branch 
-                # 0  => No access
-                # 30 => Developers + Maintainers + Admin access
-                # 40 => Maintainer + Admin access
-                # 60 => Admin access
                 gitlab_post(
                     'projects/{}/protected_branches'.format(main_repo['id']), 
                     {
                         "name": new_branch_name, 
-                        "push_access_level": 30, 
-                        "merge_access_level": 30
+                        "push_access_level": BRANCH_PROTECTION_LEVEL, 
+                        "merge_access_level": BRANCH_PROTECTION_LEVEL
                     }
                 )
 
